@@ -23,6 +23,5 @@ jobs:
       uses: actions/checkout@master
     - name: compile firmware for all keyboards
       run: |
-        qmk list-keyboards | grep -v ^pcilabs/dapboot > keebs.txt
-        xargs < keebs.txt -I keebname qmk compile -j0 -kb keebname -km default
+        qmk mass-compile -j0 -f "manufacturer=PCI Labs"
       
