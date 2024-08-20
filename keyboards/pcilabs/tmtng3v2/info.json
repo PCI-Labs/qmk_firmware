@@ -1,0 +1,55 @@
+{
+    "manufacturer": "PCI Labs",
+    "keyboard_name": "tmtng3v2",
+    "maintainer": "Timass",
+    "processor": "STM32F103",
+    "bootloader": "custom",
+    "features": {
+        "bootmagic": true,
+        "command": false,
+        "console": true,
+        "extrakey": true,
+        "mousekey": true,
+        "nkro": true,
+        "rgb_matrix": true
+    },
+    "url": "",
+    "usb": {
+        "vid": "0x0727",
+        "pid": "0x0727",
+        "device_version": "0.0.1"
+    },
+    "ws2812": {
+        "pin": "B8",
+        "driver": "bitbang"
+      },
+      "rgb_matrix": {
+        "driver": "ws2812",
+        "led_count": 7,
+        "sleep": true,
+        "centre_point": [112, 32],
+        "layout":
+        [
+          {"flags": 4, "matrix": [0, 6], "x": 97, "y": 0},
+          {"flags": 4, "matrix": [0, 5], "x": 83, "y": 0},
+          {"flags": 4, "matrix": [0, 4], "x": 65, "y": 0},
+          {"flags": 4, "matrix": [0, 3], "x": 50, "y": 0},
+          {"flags": 4, "matrix": [0, 2], "x": 36, "y": 0},
+          {"flags": 4, "matrix": [0, 1], "x": 21, "y": 0},
+          {"flags": 4, "matrix": [0, 0], "x": 0, "y": 0}
+        ]
+      },
+    "layouts": {
+        "LAYOUT": {
+            "layout": [
+            {"matrix": [0, 0], "x": 0, "y": 0},
+            {"matrix": [0, 1], "x": 1.5, "y": 0},
+            {"matrix": [0, 2], "x": 2.5, "y": 0},
+            {"matrix": [0, 3], "x": 3.5, "y": 0},
+            {"matrix": [0, 4], "x": 4.5, "y": 0},
+            {"matrix": [0, 5], "x": 5.75, "y": 0},
+            {"matrix": [0, 6], "x": 6.75, "y": 0}
+            ]
+        }
+    }
+}
