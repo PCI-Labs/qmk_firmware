@@ -20,19 +20,6 @@ void lut_init(void) {
     }
 }
 
-void key_init(void) {
-    for (uint8_t row = 0; row < MATRIX_ROWS; row++) {
-        for (uint8_t col = 0; col < MATRIX_COLS; col++) {
-            analog_key_t *key = &keys[row][col];
-            key->value = 0;
-            key->extremum = 0;
-            key->offset = 0;
-            key->continuous_dynamic_actuation = 0;
-            key-> raw = 0;
-        }
-    }
-}
-
 void get_sensor_offsets(void) {
     matrix_scan();
     for (uint8_t row = 0; row < MATRIX_ROWS; row++) {
@@ -40,9 +27,21 @@ void get_sensor_offsets(void) {
             analog_key_t  *key            = &keys[row][col];
             const uint16_t rest_adc_value = distance_to_adc(0, key->switch_type);
             key->offset                   = rest_adc_value - key->raw;
+            if (key->offset < -230) {
+                key->switch_type = latenpow;    
+            } else if (key->offset > -200) {
+                key->switch_type = KS_20; 
+            }
+            
+       //      if (key->offset < -200) {
+         //       key->switch_type = KS_20; 
+           //  } 
+            key->lut = &luts[key->switch_type].values;
+            
         }
     }
 }
+
 
 void update_extremum(analog_key_t *key) {
     key->extremum = key->value;
@@ -91,15 +90,26 @@ if the key is not pressed, the extremum is the highest value reached. */
 void matrix_read_cols_dynamic_actuation(matrix_row_t *current_row, uint8_t current_col, analog_key_t *key) {
     if (key->value > key->actuation_point) {
         /* In DA zone? */
-        if (*current_row & (1 << current_col)) {
-            /* Key is pressed
-            Is key still moving down? */
+         if ((*current_row) & (1 << current_col)) {
+            // Key is pressed
             if (key->value > key->extremum) {
                 update_extremum(key);
-            } else if (key->value <= MAX(key->extremum - key->release_sensitivity, 0)) {
-                /* Has key moved up enough to be released? */
-                deregister_key(current_row, current_col);
-                update_extremum(key);
+            } else {
+                // Normal release threshold
+                int16_t release_threshold = key->extremum - key->release_sensitivity;
+                       
+                if (key->extremum >= 330) {
+                    int16_t clamp_val = key->extremum - key->deadzone; // e.g. extremum - 20
+                    if (release_threshold > clamp_val) {
+                        release_threshold = clamp_val;
+                    }
+                }
+
+                // Normal release check
+                if (key->value <= release_threshold) {
+                    deregister_key(current_row, current_col);
+                    update_extremum(key);
+                }
             }
         } else {
             /* Key is not pressed
@@ -122,39 +132,75 @@ void matrix_read_cols_dynamic_actuation(matrix_row_t *current_row, uint8_t curre
     }
 }
 
-void matrix_read_cols_continuous_dynamic_actuation(matrix_row_t *current_row, uint8_t current_col, analog_key_t *key) {
-    if (key->continuous_dynamic_actuation) {
-        if (*current_row & (1 << current_col)) {
-            /* Key is pressed
-            Is key still moving down? */
+
+
+
+void matrix_read_cols_continuous_dynamic_actuation(
+    matrix_row_t *current_row,
+    uint8_t current_col,
+    analog_key_t *key
+) {
+    // 1) Check if we should enter CDA zone
+    if (!key->in_cda_zone && key->value > key->actuation_point) {
+        key->in_cda_zone = true;
+    }
+
+    // 2) If in CDA zone, do dynamic logic
+    if (key->in_cda_zone) {
+        // If the key is currently pressed in the matrix
+        if ((*current_row) & (1 << current_col)) {
+            // Key is pressed
             if (key->value > key->extremum) {
                 update_extremum(key);
+            } else {
+                // Normal release threshold
+                int16_t release_threshold = key->extremum - key->release_sensitivity;
 
-            } else if (key->value <= MAX(key->extremum - key->release_sensitivity, 0)) {
-                /* Has key moved up enough to be released? */
-                deregister_key(current_row, current_col);
-                update_extremum(key);
+                // ---------------------------------------
+                // ONLY apply the 20 offset if "near top"
+                // ---------------------------------------
+                // Suppose we say "top" = any extremum >= 300
+                if (key->extremum >= 350) {
+                    int16_t clamp_val = key->extremum - key->deadzone; // e.g. extremum - 20
+                    if (release_threshold > clamp_val) {
+                        release_threshold = clamp_val;
+                    }
+                }
+
+                // Normal release check
+                if (key->value <= release_threshold) {
+                    deregister_key(current_row, current_col);
+                    update_extremum(key);
+                }
             }
         } else {
-            /* Key is not pressed
-            Is the key still moving up? */
+            // Key is NOT pressed
             if (key->value < key->extremum) {
                 update_extremum(key);
-            } else if (key->value >= MIN(key->extremum + key->press_sensitivity, switch_ranges[key->switch_type])) {
-                /* Has key moved down enough to be pressed? */
+            } else if (key->value >= MIN(key->extremum + key->press_sensitivity,
+                                         switch_ranges[key->switch_type])) {
                 register_key(current_row, current_col);
                 update_extremum(key);
             }
         }
-        if (key->value == 0) {
+
+        // 3) Possibly exit the CDA zone if fully unpressed
+        if (key->value <= 10) {
+            key->in_cda_zone = false;
             deregister_key(current_row, current_col);
-            update_extremum(key);
-            key->continuous_dynamic_actuation = false;
+
+            if (key->value > key->extremum) {
+                update_extremum(key);
+            }
         }
-    } else if (key->value > key->actuation_point) {
-        register_key(current_row, current_col);
-        update_extremum(key);
-        key->continuous_dynamic_actuation = true;
+    }
+    else {
+        // If not in CDA zone, normal logic
+        deregister_key(current_row, current_col);
+
+        if (key->value > key->extremum) {
+            update_extremum(key);
+        }
     }
 }
 

@@ -22,6 +22,7 @@ typedef union {
         uint8_t       release_sensitivity;
         uint8_t       press_hysteresis;
         uint8_t       release_hysteresis;
+        uint8_t       deadzone;
         // uint16_t      dks_actuation_point;
     };
     uint8_t config_raw[EECONFIG_KEY_DATA_SIZE];
@@ -32,7 +33,7 @@ typedef struct {
     uint16_t value;
     uint16_t extremum;
     int32_t  offset;
-    bool     continuous_dynamic_actuation;
+    bool     in_cda_zone;
     uint16_t raw;
     uint16_t (*lut)[ADC_RESOLUTION_MAX];
     key_config_t; // gcc extension, use -fplan9-extensions
@@ -57,12 +58,13 @@ typedef union {
 _Static_assert(sizeof(eeconfig_kb_t) == EECONFIG_KB_DATA_SIZE, "Size mismatch");
 
 static const key_config_t key_config_default = {
-    .mode                = static_actuation,
-    .switch_type         = latenpow,
+    .mode                = dynamic_actuation,
+    .switch_type         = KS_20,
     .actuation_point     = 120,
     .press_sensitivity   = 32,
     .release_sensitivity = 32,
     .press_hysteresis    = 10,
     .release_hysteresis  = 10,
+    .deadzone            = 0,
     //.dks_actuation_point = 0
 };

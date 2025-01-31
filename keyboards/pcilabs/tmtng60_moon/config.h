@@ -4,12 +4,17 @@ SPDX-License-Identifier: GPL-2.0-or-later
 */
 #pragma once
 #include "pcilabs_common/pcilabs_config_common.h"
-
+#define SERIAL_NUMBER "A02B2305W052H14688"
 #define RAW_USAGE_PAGE 0xFF60
 #define RAW_USAGE_ID 0x61
 
 #define MATRIX_ROWS 5
 #define MATRIX_COLS 14
+
+#ifdef JOYSTICK_ENABLE
+#    define JOYSTICK_AXIS_COUNT 5
+#    define JOYSTICK_BUTTON_COUNT 14
+#endif
 
 #define MUXES 4
 #define MUX_PINS \

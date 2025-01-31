@@ -102,20 +102,6 @@ void raw_hid_send_all_key_configs(void) {
     }
 }
 
-void raw_hid_send_debug_key_state(uint8_t row, uint8_t col, uint16_t raw, uint16_t value, bool state){
-    /* debug report structure: id, row, col, raw_low, raw_high, value_low, value_high, state */
-    uint8_t data[32];
-    data[0] = SEND_DEBUG_KEY_STATE;
-    data[1] = row;
-    data[2] = col;
-    data[3] = (uint8_t) raw & 255;
-    data[4] = (uint8_t) raw >> 8;
-    data[5] = (uint8_t) value & 255;
-    data[6] = (uint8_t) value >> 8;
-    data[7] = state;
-    raw_hid_send(data, 32);
-}
-
 void raw_hid_receive(uint8_t *data, uint8_t length) {
     report_id_t report_id = data[0];
     switch (report_id) {
@@ -140,13 +126,14 @@ void raw_hid_receive(uint8_t *data, uint8_t length) {
             uint8_t      row         = data[1];
             uint16_t     row_val     = (uint16_t)data[2] | (uint16_t)data[3] << 8;
             key_config_t new_config  = {
-                .switch_type         = data[4],
+               // .switch_type         = data[4],
                 .mode                = data[5],
                 .actuation_point     = (uint16_t)data[6] | (uint16_t)data[7] << 8,
                 .press_sensitivity   = data[8],
                 .release_sensitivity = data[9],
                 .press_hysteresis    = data[10],
-                .release_hysteresis  = data[11]
+                .release_hysteresis  = data[11],
+                .deadzone            = data[12]
             };
             for (uint8_t col = 0; col < MATRIX_COLS; col++) {
                 if ((row_val >> col) & 1) {
@@ -154,7 +141,7 @@ void raw_hid_receive(uint8_t *data, uint8_t length) {
                 }
             }
             lut_init();
-            values_save();
+            values_save();                                                                 
             get_sensor_offsets();
             break;
         case RECIEVE_KEY_REBIND:;
@@ -191,8 +178,6 @@ void raw_hid_receive(uint8_t *data, uint8_t length) {
             else if (data[1] == 2)
                 rgb_matrix_step_reverse();
             raw_hid_send_rgb_settings();
-            break;
-        case SEND_DEBUG_KEY_STATE:;
             break;
     }
 }
