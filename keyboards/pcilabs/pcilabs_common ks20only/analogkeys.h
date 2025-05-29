@@ -9,10 +9,9 @@ SPDX-License-Identifier: GPL-2.0-or-later
 #include <stdbool.h>
 #include "config.h"
 
-
 typedef enum __attribute__((__packed__)) { static_actuation, dynamic_actuation, continuous_dynamic_actuation, dynamic_keystroke } analog_mode_t;
 typedef enum __attribute__((__packed__)) { latenpow, KS_20 } switch_type_t;
-static const uint16_t switch_ranges[] = {[latenpow] = 400, [KS_20] = 410};
+static const uint16_t switch_ranges[] = {[latenpow] = 410, [KS_20] = 410};
 
 typedef union {
     struct {
@@ -23,7 +22,6 @@ typedef union {
         uint8_t       release_sensitivity;
         uint8_t       press_hysteresis;
         uint8_t       release_hysteresis;
-        uint8_t       deadzone;
         // uint16_t      dks_actuation_point;
     };
     uint8_t config_raw[EECONFIG_KEY_DATA_SIZE];
@@ -34,7 +32,7 @@ typedef struct {
     uint16_t value;
     uint16_t extremum;
     int32_t  offset;
-    bool     in_cda_zone;
+    bool     continuous_dynamic_actuation;
     uint16_t raw;
     uint16_t (*lut)[ADC_RESOLUTION_MAX];
     key_config_t; // gcc extension, use -fplan9-extensions
@@ -66,6 +64,5 @@ static const key_config_t key_config_default = {
     .release_sensitivity = 32,
     .press_hysteresis    = 10,
     .release_hysteresis  = 10,
-    .deadzone            = 0,
     //.dks_actuation_point = 0
 };

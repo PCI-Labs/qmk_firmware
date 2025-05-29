@@ -16,10 +16,10 @@ SPDX-License-Identifier: GPL-2.0-or-later
 
 #define MUX_CHANNELS ( 1 << MUX_SELECTOR_BITS )
 */
-#define EECONFIG_KEY_DATA_SIZE 8
+#define EECONFIG_KEY_DATA_SIZE 6
 #define EECONFIG_KB_DATA_SIZE EECONFIG_KEY_DATA_SIZE * MATRIX_ROWS * MATRIX_COLS + 1
 
-//define DEBUG_ENABLE
+#define DEBUG_ENABLE
 #define DEBUG_MATRIX_SCAN_RATE
 #define ADC_RESOLUTION ADC_CFGR1_RES_12BIT
 #define ADC_SAMPLING_TIME ADC_SMPR_SMP_1P5
@@ -34,8 +34,8 @@ SPDX-License-Identifier: GPL-2.0-or-later
 #    define WS2812_PWM_CHANNEL 1
 #    define WS2812_PWM_PAL_MODE 1
 #    define WS2812_DMA_STREAM STM32_DMA1_STREAM3
-#    define WS2812_TIMING 1400
-#    define WS2812_T1H 975
-#    define WS2812_T0H 425
-#    define WS2812_TRST_US 350
+//#    define WS2812_TIMING 1400
+//#    define WS2812_T1H 975
+//#    define WS2812_T0H 425
+//#    define WS2812_TRST_US 350
 #endif

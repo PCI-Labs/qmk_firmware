@@ -2,15 +2,11 @@ MCU_FAMILY = STM32
 MCU_SERIES = STM32F1xx
 BOARD = STM32_F103_STM32DUINO
 
-JOYSTICK_ENABLE = yes
-JOYSTICK_DRIVER = digital
-
 MCU_LDSCRIPT = GD32F303xC-dapboot
 BOOTLOADER = custom
 SRC += keyboards/pcilabs/pcilabs_common/dapboot/bootloader.c
 
 include keyboards/pcilabs/pcilabs_common/pcilabs_common.mk
-include keyboards/pcilabs/pcilabs_common/multiplexer/multiplexer.mk
 
 RAW_ENABLE = yes
 WAIT_FOR_USB = yes
@@ -21,10 +17,6 @@ WEAR_LEVELING_DRIVER = embedded_flash
 OPT = 2
 CFLAGS += -fplan9-extensions
 
-OPT_DEFS += -DSHARED_EP_ENABLE -DKEYBOARD_SHARED_EP
-
 CUSTOM_MATRIX = lite
 SRC += matrix.c
 
-# Add custom RGB matrix effects
-RGB_MATRIX_CUSTOM_KB = no
