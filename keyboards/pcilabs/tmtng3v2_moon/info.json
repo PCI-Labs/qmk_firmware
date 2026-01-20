@@ -17,7 +17,7 @@
         "dynamic_keymap": true
     },
     "qmk": {
-        "tap_keycode_delay": 10
+        "tap_keycode_delay": 0
     },
     "debounce": 0,
     "build": {
